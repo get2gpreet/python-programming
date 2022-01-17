@@ -3,28 +3,32 @@
 ******
 
 <details>
-<summary>Exercise 1: Working with Lists </summary>
+<summary>Exercise 1: Working with Lists</summary>
  <br />
 
-- First you need to install eksctl command line tool locally. See the installation guide here: https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html
-
-**Steps**
 ```sh
-# create cluster with 3 EC2 instances and store access configuration to cluster in kubeconfig.my-cluster.yaml file 
-eksctl create cluster --name=my-cluster --nodes=3 --kubeconfig=./kubeconfig.my-cluster.yaml
+# Print out elements higher than or equal 10
+my_list = [1, 2, 2, 4, 4, 5, 6, 8, 10, 13, 22, 35, 52, 83]
+for number in my_list:
+    if number >= 10:
+        print(number)
 
-# create fargate profile in the cluster. It will apply for all K8s components in my-app namespace
-eksctl create fargateprofile \
-    --cluster my-cluster \
-    --name my-fargate-profile \
-    --namespace my-app
+# Make a new list with all elements higher than or equal 10 and print it out
+my_list = [1, 2, 2, 4, 4, 5, 6, 8, 10, 13, 22, 35, 52, 83]
+my_new_list = []
+for number in my_list:
+    if number >= 10:
+        my_new_list.append(number)
+print(my_new_list)
 
-# point kubectl to your cluster - use absolute path to kubeconfigfile
-export KUBECONFIG={absolute-path}/kubeconfig.my-cluster.yaml
-
-# validate cluster is accessible and nodes and fargate profile created
-kubectl get node
-eksctl get fargateprofile --cluster my-cluster
+# User input as a number and print a list that contains only those elements from my_list that are higher than the number given by the user.
+user_input = input("Enter a number: ")
+my_list = [1, 2, 2, 4, 4, 5, 6, 8, 10, 13, 22, 35, 52, 83]
+my_new_list = []
+for number in my_list:
+    if number > int(user_input):
+        my_new_list.append(number)
+print(my_new_list)
 
 ```
 
@@ -36,160 +40,78 @@ eksctl get fargateprofile --cluster my-cluster
 <summary>Exercise 2: Working with Dictionaries </summary>
  <br />
 
-**General notes**
-- All the k8s manifest files for the exercise are in "k8s-deployment" folder, so:
+**Working with one dictionary**
 ```sh
-# clone this repository locally
-git clone git@gitlab.com:devops-bootcamp3/bootcamp-java-mysql.git
+# Update the job to Software Engineer
+employee = {
+  "name": "Tim",
+  "age": 30,
+  "birthday": "1990-03-10",
+  "job": "DevOps Engineer"
+}
 
-# check out the solutions branch
-git checkout feature/solutions
+employee["job"] = "Software Engineer"
+print(employee)
 
-# change to k8s-deployment folder
-cd k8s-deployment
+# Remove the age key from the dictionary
+employee = {
+  "name": "Tim",
+  "age": 30,
+  "birthday": "1990-03-10",
+  "job": "DevOps Engineer"
+}
+
+employee.pop("age")
+print(employee)
+
+# Loop through the dictionary and print the key:value pairs one by one
+employee = {
+  "name": "Tim",
+  "age": 30,
+  "birthday": "1990-03-10",
+  "job": "DevOps Engineer"
+}
+
+for key, value in employee.items():
+  print(f"{key}:{value}")
 
 ```
-
-- Mysql Chart link: 
-https://github.com/bitnami/charts/tree/master/bitnami/mysql 
-
+**Working with multiple dictionaries**
 ```sh
-# install Mysql chart 
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm install my-release bitnami/mysql -f mysql-chart-values-eks.yaml --version 8.8.6
-# Note that chart version version 8.8.8+ has a bug setting the db user password incorrectly, which affects EKS installation: https://giters.com/bitnami/charts/issues/8557, that's why we are installing an older version. 
+# Merge these two Python dictionaries into 1 new dictionary
+dict_one = {'a': 100, 'b': 400} 
+dict_two = {'x': 300, 'y': 200}
 
+dict_merged = dict_one.copy()
+dict_merged.update(dict_two) 
+print(dict_merged)
 
-# deploy phpmyadmin with its configuration for Mysql DB access
-kubectl apply -f db-config.yaml
-kubectl apply -f db-secret.yaml
-kubectl apply -f phpmyadmin.yaml
+# Sum up all the values in the new dictionary and print it out
+dict_one = {'a': 100, 'b': 400} 
+dict_two = {'x': 300, 'y': 200}
 
-# access phpmyadmin and login to mysql db
-kubectl port forward svc/phpmyadmin-service 8081:8081
+dict_merged = dict_one.copy()
+dict_merged.update(dict_two) 
 
-# access in browser on
-localhost:8081
+sum_of_values = 0
+for value in dict_merged.values():
+    sum_of_values = sum_of_values + value
+print(sum_of_values)
 
-# login with one of these 2 credentials
-"my-user" : "my-pass"
-"root" : "secret-root-pass"
+# Print the max and minimum values of the dictionary
+dict_one = {'a': 100, 'b': 400} 
+dict_two = {'x': 300, 'y': 200}
 
-```
+dict_merged = dict_one.copy()
+dict_merged.update(dict_two)
 
-</details>
+merged_values = []
+for value in dict_merged.values():
+    merged_values.append(value)
 
-******
-
-<details>
-<summary>Exercise 3: xxxxx </summary>
- <br />
-
-**Steps**
-```sh
-
-# Create namespace my-app to deploy our java application, because we are deploying java-app with fargate profile. And fargate profile we create applies for my-app namespace. 
-kubectl create namespace my-app
-
-# We now have to create all configuration and secrets for our java app in the my-app namespace
-
-# Create my-registry-key secret to pull image 
-DOCKER_REGISTRY_SERVER=docker.io
-DOCKER_USER=your dockerID, same as for `docker login`
-DOCKER_EMAIL=your dockerhub email, same as for `docker login`
-DOCKER_PASSWORD=your dockerhub pwd, same as for `docker login`
-
-kubectl create secret -n my-app docker-registry my-registry-key \
---docker-server=$DOCKER_REGISTRY_SERVER \
---docker-username=$DOCKER_USER \
---docker-password=$DOCKER_PASSWORD \
---docker-email=$DOCKER_EMAIL
-
-
-# Again from k8s-deployment folder, execute following commands. By adding the my-app namespace, these components will be created with Fargate profile
-kubectl apply -f db-secret.yaml -n my-app
-kubectl apply -f db-config.yaml -n my-app
-kubectl apply -f java-app.yaml -n my-app
-
-```
-
-</details>
-
-******
-
-<details>
-<summary>Exercise 4 & 5: Automate deployment & Use ECR as Docker repository </summary>
- <br />
-
-**Current cluster setup**
-
-At this point, you already have an EKS cluster, where: 
-- Mysql chart is deployed and phpmyadmin is running too
-- my-app namespace was created
-- db-config and db-secret were created in the my-app namspace for the java-app
-- my-registry-key secret was created to fetch image from docker-hub
-- your java app is also running 
-
-**Steps to automate deployment for existing setup**
-```sh
-# Create an ECR registry for your java-app image
-
-# Locally, on your computer: Create a docker registry secret for ECR
-DOCKER_REGISTRY_SERVER=your ECR registry server - "your-aws-id.dkr.ecr.your-ecr-region.amazonaws.com"
-DOCKER_USER=your dockerID, same as for `docker login` - "AWS"
-DOCKER_PASSWORD=your dockerhub pwd, same as for `docker login` - get using: "aws ecr get-login-password --region {ecr-region}"
-
-kubectl create secret -n my-app docker-registry my-ecr-registry-key \
---docker-server=$DOCKER_REGISTRY_SERVER \
---docker-username=$DOCKER_USER \
---docker-password=$DOCKER_PASSWORD
-
-
-# SSH into server where Jenkins container is running
-ssh -i {private-key-path} {user}@{public-ip}
-
-# Enter Jenkins container
-sudo docker exec -it {jenkins-container-id} -u 0 bash
-
-# Install aws-cli inside Jenkins container
-- Link: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
-
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-unzip awscliv2.zip
-./aws/install
-
-# Install kubectl inside Jenkins container
-- Link: https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/
-
-apt-get update
-apt-get install -y apt-transport-https ca-certificates curl
-curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
-echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
-apt-get update
-apt-get install -y kubectl
-
-# Install envsubst tool
-- Link: https://command-not-found.com/envsubst
-
-apt-get update
-apt-get install -y gettext-base
-
-# create 2 "secret-text" credentials for AWS access in Jenkins: 
-- "jenkins_aws_access_key_id" for AWS_ACCESS_KEY_ID 
-- "jenkins_aws_secret_access_key" for AWS_SECRET_ACCESS_KEY    
-
-# Create 4 "secret-text" credentials for db-secret.yaml:
-- id: "db_user", secret: "my-user"
-- id: "db_pass", secret: "my-pass"
-- id: "db_name", secret: "my-app-db"
-- id: "db_root_pass", secret: "secret-root-pass"
-
-# Set the correct values in Jenkins for following environment variables: 
-- ECR_REPO_URL
-- CLUSTER_REGION
-
-# Create Jenkins pipeline using the Jenkinsfile in this branch, in the root folder
-Make sure the paths to the k8s manifest files in the "deploy" stage of the Jenkinsfile are all correct!!
+merged_values.sort()
+print(f"min value: {merged_values[0]}")
+print(f"max value: {merged_values[len(merged_values)-1]}")
 
 ```
 
@@ -198,9 +120,423 @@ Make sure the paths to the k8s manifest files in the "deploy" stage of the Jenki
 ******
 
 <details>
-<summary>Exercise 6: Configure Autoscaling </summary>
+<summary>Exercise 3: Working with List of Dictionaries</summary>
  <br />
 
-You learn how to scale the cluster up and down in the **_Kubernetes on AWS_** module, video **_3 - Configure Autoscaling in EKS cluster_**
+```sh
+# Print out - the name, job and city of each employee using a loop. The program must work for any number of employees in the list, not just 2
+employees = [{
+  "name": "Tina",
+  "age": 30,
+  "birthday": "1990-03-10",
+  "job": "DevOps Engineer",
+  "address": {
+    "city": "New York",
+    "country": "USA"
+  }
+},
+{
+  "name": "Tim",
+  "age": 35,
+  "birthday": "1985-02-21",
+  "job": "Developer",
+  "address": {
+    "city": "Sydney",
+    "country": "Australia"
+  }
+}]
+
+for employee in employees:
+    print(f"name: {employee['name']}")
+    print(f"job: {employee['job']}")
+    print(f"city: {employee['address']['city']}")
+    print("-----------------------")
+
+# Prints the country of the second employee in the list by accessing it directly without the loop.
+employees = [{
+  "name": "Tina",
+  "age": 30,
+  "birthday": "1990-03-10",
+  "job": "DevOps Engineer",
+  "address": {
+    "city": "New York",
+    "country": "USA"
+  }
+},
+{
+  "name": "Tim",
+  "age": 35,
+  "birthday": "1985-02-21",
+  "job": "Developer",
+  "address": {
+    "city": "Sydney",
+    "country": "Australia"
+  }
+}]
+
+country = employees[1]["address"]["country"]
+print(f"country of the second employee: {country}")
+
+```
+
+</details>
+
+******
+
+<details>
+<summary>Exercise 4: Working with Functions</summary>
+ <br />
+
+**Functions in main.py**
+
+```sh
+# Write a function that accepts a list of dictionaries with employee age and prints out the name and age of the youngest employee
+employees = [{
+  "name": "Tina",
+  "age": 30,
+  "birthday": "1990-03-10",
+  "job": "DevOps Engineer",
+  "address": {
+    "city": "New York",
+    "country": "USA"
+  }
+},
+{
+  "name": "Tim",
+  "age": 35,
+  "birthday": "1985-02-21",
+  "job": "Developer",
+  "address": {
+    "city": "Sydney",
+    "country": "Australia"
+  }
+}]
+
+def print_employee_info(employees):
+    youngest_employee_age = employees[0]["age"]
+    youngest_employee_name = employees[0]["name"]
+    for employee in employees:
+        if employee["age"] < youngest_employee_age:
+            youngest_employee_age = employee["age"]
+            youngest_employee_name = employee["name"]
+
+    print(f"name of the youngest employee: {youngest_employee_name}")
+    print(f"age of the youngest employee: {youngest_employee_age}")
+
+print_employee_info(employees)
+
+# Write a function that accepts a string and calculates the number of upper case letters and lower case letters
+def count_upper_and_lower_letters(string):
+    lower_letters = 0
+    upper_letters = 0
+    for char in list(string):
+        if char.islower():
+            lower_letters += 1
+        elif char.isupper():
+            upper_letters += 1
+    print(f"number of lower case letters: ", lower_letters)
+    print(f"number of upper case letters: ", upper_letters)
+
+count_upper_and_lower_letters("sWWbb137WATbfgdbWb")
+
+# Write a function that prints the even numbers from a provided list
+def print_even_numbers(numbers_list):
+    for number in numbers_list:
+        if number % 2 == 0:
+            print(number)
+
+print_even_numbers([0, 3, 9, 10, 2, 13, 120])
+
+```
+
+**Function in helper module**
+
+For cleaner code, declare these functions in its own helper Module and use them in the main.py file
+
+_helper.py_
+
+```sh
+def print_employee_info(employees):
+    youngest_employee_age = employees[0]["age"]
+    youngest_employee_name = employees[0]["name"]
+    for employee in employees:
+        if employee["age"] < youngest_employee_age:
+            youngest_employee_age = employee["age"]
+            youngest_employee_name = employee["name"]
+
+    print(f"name of the youngest employee: {youngest_employee_name}")
+    print(f"age of the youngest employee: {youngest_employee_age}")
+
+def count_upper_and_lower_letters(string):
+    lower_letters = 0
+    upper_letters = 0
+    for char in list(string):
+        if char.islower():
+            lower_letters += 1
+        elif char.isupper():
+            upper_letters += 1
+    print(f"number of lower case letters: ", lower_letters)
+    print(f"number of upper case letters: ", upper_letters)
+
+def print_even_numbers(numbers_list):
+    for number in numbers_list:
+        if number % 2 == 0:
+            print(number)
+
+```
+
+_main.py_
+
+```sh
+from helper import print_employee_info, count_upper_and_lower_letters, print_even_numbers
+
+employees = [{
+  "name": "Tina",
+  "age": 30,
+  "birthday": "1990-03-10",
+  "job": "DevOps Engineer",
+  "address": {
+    "city": "New York",
+    "country": "USA"
+  }
+},
+{
+  "name": "Tim",
+  "age": 35,
+  "birthday": "1985-02-21",
+  "job": "Developer",
+  "address": {
+    "city": "Sydney",
+    "country": "Australia"
+  }
+}]
+
+print_employee_info(employees)
+
+count_upper_and_lower_letters("sWWbb137WATbfgdbWb")
+
+print_even_numbers([0, 3, 9, 10, 2, 13, 120])
+
+```
+
+</details>
+
+******
+
+<details>
+<summary>Exercise 5: Python Program 'Calculator' </summary>
+ <br />
+
+```sh
+def calculator(number1, number2, operation):
+    # from Python verson 3.10, you can use match-case
+    if operation == "plus":
+        print(number1 + number2)
+    elif operation == "minus":
+        print(number1 - number2)
+    elif operation == "multiply":
+        print(number1 * number2)
+    elif operation == "divide":
+        print(number1 / number2)
+    
+
+number_of_calculations_done = 0 
+while True:
+    number1 = input("Enter the first number: ")
+
+    if number1 == "exit":
+        print("exiting the program")
+        print(f"you did {number_of_calculations_done} calculations")
+        break
+
+    number2 = input("Enter the second number: ")
+    operation = input("What operation do you want to perform on these numbers (plus, minus, multiply, divide): ")
+
+    valid_numbers = number1.isnumeric() and number2.isnumeric()
+    valid_operation = operation == "plus" or operation == "minus" or operation == "multiply" or operation == "divide"
+    if not valid_numbers:
+        print("only numbers allowed") 
+    elif not valid_operation:
+        print("operation not supported")
+    else:
+        calculator(int(number1), int(number2), operation)
+        number_of_calculations_done += 1
+
+```
+
+</details>
+
+******
+
+<details>
+<summary>Exercise 6: Python Program 'Guessing Game' </summary>
+ <br />
+
+```sh
+from random import randint
+
+while True:
+    number_to_guess = randint(1, 19)
+    users_guess = int(input("Guess the number: "))
+
+    if users_guess == number_to_guess:
+        print("YOU WON!")
+        break
+
+    elif users_guess < number_to_guess:
+        print("You guessed too low")
+
+    elif users_guess > number_to_guess:
+        print("You guessed too high")
+
+```
+
+</details>
+
+******
+
+<details>
+<summary>Exercise 7: Working with Classes and Objects </summary>
+ <br />
+
+**lecture.py**
+```sh
+class Lecture:
+    def __init__(self, name, max_students, duration, professors):
+        self.name = name
+        self.max_students = max_students
+        self.duration_minutes = duration
+        self.professors = professors
+    
+    def print_name_and_duration(self):
+        print(f"{self.name} - {self.duration_minutes} minutes")
+
+    def add_professors(self, new_professor):
+        self.professors.append(new_professor)
+```
+
+_Professor and Student inherit from Person class_
+**person.py** 
+
+```sh
+class Person:
+    def __init__(self, first_name, last_name, age):
+        self.first_name = first_name
+        self.last_name = last_name
+        self.age = age
+    
+    def print_full_name(self):
+        print(f"{self.first_name} {self.last_name}")
+```
+**professor.py** 
+
+```sh
+from person import Person
+
+class Professor(Person):
+    def __init__(self, first_name, last_name, age, lectures):
+        super().__init__(first_name, last_name, age)
+        self.lectures = lectures
+
+    def list_lectures(self):
+        print("Teaches lectures:")
+        for lecture in self.lectures:
+            print(f"- {lecture.name}")
+    
+    def teach_lecture(self, new_lecture):
+        self.lectures.append(new_lecture)
+
+    def remove_lecture(self, lecture):
+        self.lectures.pop(lecture)
+```
+**student.py** 
+
+```sh
+from person import Person
+
+class Student(Person):
+    def __init__(self, first_name, last_name, age, lectures):
+        super().__init__(first_name, last_name, age)
+        self.lectures = lectures
+    
+    def list_lectures(self):
+        print("Attends lectures:")
+        for lecture in self.lectures:
+            print(f"- {lecture.name}")
+
+    def attend_lecture(self, new_lecture):
+        self.lectures.append(new_lecture)
+
+    def leave_lecture(self, lecture):
+        self.lectures.pop(lecture)
+```
+
+_test your code in main file_
+**main.py** 
+
+```sh
+from professor import Professor
+from student import Student
+from lecture import Lecture
+
+cs_lecture = Lecture("Computer science", 15, 45, [])
+python_basics_lecture = Lecture("Python programming basics", 25, 90, [])
+python_advanced_lecture = Lecture("Python advanced", 10, 90, [])
+algorithms_lecture = Lecture("Algorithms and data sturctures", 30, 120, [])
+
+new_professor = Professor("Maria", "Smith", 34, [cs_lecture, python_basics_lecture])
+new_professor.print_full_name()
+new_professor.teach_lecture(python_advanced_lecture)
+new_professor.list_lectures()
+
+cs_lecture.add_professors(new_professor)
+python_basics_lecture.add_professors(new_professor)
+python_advanced_lecture.add_professors(new_professor)
+
+print("------------------------------")
+
+new_student = Student("David", "Green", 25, [algorithms_lecture])
+new_student.print_full_name()
+new_student.attend_lecture(python_basics_lecture)
+new_student.list_lectures()
+
+print("------------------------------")
+
+cs_lecture.print_name_and_duration()
+python_basics_lecture.print_name_and_duration()
+```
 
 
+</details>
+
+******
+
+<details>
+<summary>Exercise 8: Working with Dates </summary>
+ <br />
+
+```sh
+from datetime import datetime
+birthday_string = input("Enter your birthday (example - 20/09/2000): ")
+
+birthday_date = datetime.strptime(birthday_string, '%d/%m/%Y').date()
+today = datetime.today()
+
+difference_one = datetime(today.year, birthday_date.month, birthday_date.day)
+difference_two = datetime(today.year + 1, birthday_date.month, birthday_date.day)
+
+days_till_birthday = 0
+if difference_one > today:
+    # birthday this year
+    days_till_birthday = difference_one - today
+else:
+    # birthday next year
+    days_till_birthday = difference_two - today   
+
+print(f"{days_till_birthday.days} days till your birthday")
+
+```
+
+</details>
+
+******
