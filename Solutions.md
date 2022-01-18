@@ -590,3 +590,25 @@ _NOTE: there are also other libraries for working with spreadsheets, which enabl
 </details>
 
 ******
+
+<details>
+<summary>Exercise 10: Working with REST APIs </summary>
+ <br />
+
+```sh
+import requests
+
+# replace with your own user 
+user = "nanuchi"
+response = requests.get(f"https://api.github.com/users/{user}/repos")
+my_projects = response.json()
+
+# print just the names and urls
+for project in my_projects:
+    print(f"Project Name: {project['name']}\nProject Url: {project['html_url']}\n")
+
+```
+
+</details>
+
+******
